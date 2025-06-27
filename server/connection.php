@@ -1,18 +1,15 @@
 <?php
-// Database Connection Configuration
-class DatabaseConnection {
-    private static $instance = null;
-    private $connection;
-    
+class Database {
     private $host = 'localhost';
-    private $database = 'ai_netsage';
+    private $dbname = 'ai_netsage_database';
     private $username = 'root';
     private $password = '';
-    
-    private function __construct() {
+    private $connection;
+
+    public function __construct() {
         try {
             $this->connection = new PDO(
-                "mysql:host={$this->host};dbname={$this->database};charset=utf8mb4",
+                "mysql:host={$this->host};dbname={$this->dbname};charset=utf8mb4",
                 $this->username,
                 $this->password,
                 [
@@ -26,75 +23,65 @@ class DatabaseConnection {
             throw new Exception("Database connection failed");
         }
     }
-    
-    public static function getInstance() {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-        return self::$instance;
-    }
-    
+
     public function getConnection() {
         return $this->connection;
     }
-    
-    public function prepare($query) {
-        return $this->connection->prepare($query);
-    }
-    
-    public function lastInsertId() {
-        return $this->connection->lastInsertId();
-    }
-    
-    public function beginTransaction() {
-        return $this->connection->beginTransaction();
-    }
-    
-    public function commit() {
-        return $this->connection->commit();
-    }
-    
-    public function rollback() {
-        return $this->connection->rollback();
-    }
-}
 
-// Error handling and logging
-function logError($message, $context = []) {
-    $timestamp = date('Y-m-d H:i:s');
-    $logMessage = "[$timestamp] $message";
-    if (!empty($context)) {
-        $logMessage .= " Context: " . json_encode($context);
-    }
-    error_log($logMessage . PHP_EOL, 3, __DIR__ . '/logs/error.log');
-}
-
-// Response helper
-function sendResponse($data, $status = 200) {
-    http_response_code($status);
-    header('Content-Type: application/json');
-    header('Access-Control-Allow-Origin: *');
-    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-    header('Access-Control-Allow-Headers: Content-Type, Authorization');
-    
-    echo json_encode($data);
-    exit;
-}
-
-// Input sanitization
-function sanitizeInput($input) {
-    if (is_array($input)) {
-        return array_map('sanitizeInput', $input);
-    }
-    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
-}
-
-// Validate required fields
-function validateRequired($data, $required_fields) {
-    foreach ($required_fields as $field) {
-        if (!isset($data[$field]) || empty($data[$field])) {
-            return false;
+    public function query($sql, $params = []) {
+        try {
+            $stmt = $this->connection->prepare($sql);
+            $stmt->execute($params);
+            return $stmt;
+        } catch (PDOException $e) {
+            error_log("Query failed: " . $e->getMessage());
+            throw new Exception("Query execution failed");
         }
     }
-    return true;
+
+    public function fetchAll($sql, $params = []) {
+        return $this->query($sql, $params)->fetchAll();
+    }
+
+    public function fetchOne($sql, $params = []) {
+        return $this->query($sql, $params)->fetch();
+    }
+
+    public function insert($table, $data) {
+        $columns = implode(',', array_keys($data));
+        $placeholders = ':' . implode(', :', array_keys($data));
+        $sql = "INSERT INTO {$table} ({$columns}) VALUES ({$placeholders})";
+        
+        $this->query($sql, $data);
+        return $this->connection->lastInsertId();
+    }
+
+    public function update($table, $data, $conditions) {
+        $setClause = [];
+        foreach ($data as $key => $value) {
+            $setClause[] = "{$key} = :{$key}";
+        }
+        $setClause = implode(', ', $setClause);
+        
+        $whereClause = [];
+        foreach ($conditions as $key => $value) {
+            $whereClause[] = "{$key} = :where_{$key}";
+            $data["where_{$key}"] = $value;
+        }
+        $whereClause = implode(' AND ', $whereClause);
+        
+        $sql = "UPDATE {$table} SET {$setClause} WHERE {$whereClause}";
+        return $this->query($sql, $data);
+    }
+
+    public function delete($table, $conditions) {
+        $whereClause = [];
+        foreach ($conditions as $key => $value) {
+            $whereClause[] = "{$key} = :{$key}";
+        }
+        $whereClause = implode(' AND ', $whereClause);
+        
+        $sql = "DELETE FROM {$table} WHERE {$whereClause}";
+        return $this->query($sql, $conditions);
+    }
 }

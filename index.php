@@ -10,211 +10,259 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
-    <header class="main-header">
-        <nav class="navbar">
-            <div class="nav-brand">
-                <i class="fas fa-network-wired"></i>
-                <span>AI NetSage</span>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-network-wired"></i>
+                    <h1>AI NetSage</h1>
+                </div>
+                <nav class="main-nav">
+                    <button class="nav-btn active" data-tab="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        Dashboard
+                    </button>
+                    <button class="nav-btn" data-tab="monitor">
+                        <i class="fas fa-desktop"></i>
+                        Network Monitor
+                    </button>
+                    <button class="nav-btn" data-tab="analyzer">
+                        <i class="fas fa-brain"></i>
+                        Log Analyzer
+                    </button>
+                    <button class="nav-btn" data-tab="prompts">
+                        <i class="fas fa-comments"></i>
+                        AI Prompts
+                    </button>
+                    <button class="nav-btn" data-tab="settings">
+                        <i class="fas fa-cog"></i>
+                        Settings
+                    </button>
+                </nav>
             </div>
-            <ul class="nav-menu">
-                <li><a href="#dashboard" class="nav-link active">Dashboard</a></li>
-                <li><a href="#analysis" class="nav-link">Analysis</a></li>
-                <li><a href="#models" class="nav-link">AI Models</a></li>
-                <li><a href="#reports" class="nav-link">Reports</a></li>
-            </ul>
-        </nav>
-    </header>
+        </header>
 
-    <main class="main-content">
-        <!-- Dashboard Section -->
-        <section id="dashboard" class="content-section active">
-            <div class="dashboard-header">
-                <h1>Network Intelligence Dashboard</h1>
-                <div class="status-indicators">
-                    <div class="status-card">
-                        <i class="fas fa-shield-alt"></i>
-                        <span class="status-label">Security Status</span>
-                        <span class="status-value" id="security-status">Normal</span>
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <div class="dashboard-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-wifi"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Active Devices</h3>
+                            <div class="stat-value" id="activeDevices">0</div>
+                        </div>
                     </div>
-                    <div class="status-card">
-                        <i class="fas fa-eye"></i>
-                        <span class="status-label">Active Monitoring</span>
-                        <span class="status-value" id="monitoring-count">0</span>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Alerts</h3>
+                            <div class="stat-value" id="alertCount">0</div>
+                        </div>
                     </div>
-                    <div class="status-card">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span class="status-label">Anomalies</span>
-                        <span class="status-value" id="anomaly-count">0</span>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-upload"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Data Transfer</h3>
+                            <div class="stat-value" id="dataTransfer">0 MB</div>
+                        </div>
                     </div>
-                </div>
-            </div>
-
-            <div class="dashboard-grid">
-                <div class="widget">
-                    <h3>Recent Network Activity</h3>
-                    <div id="activity-logs" class="log-container">
-                        <div class="loading">Loading network activity...</div>
-                    </div>
-                </div>
-
-                <div class="widget">
-                    <h3>AI Analysis Results</h3>
-                    <div id="ai-insights" class="insights-container">
-                        <div class="loading">Processing AI insights...</div>
-                    </div>
-                </div>
-
-                <div class="widget">
-                    <h3>Trend Analysis</h3>
-                    <div id="trend-analysis" class="trends-container">
-                        <div class="loading">Analyzing patterns...</div>
-                    </div>
-                </div>
-
-                <div class="widget">
-                    <h3>Recommended Actions</h3>
-                    <div id="recommendations" class="recommendations-container">
-                        <div class="loading">Generating recommendations...</div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Analysis Section -->
-        <section id="analysis" class="content-section">
-            <div class="section-header">
-                <h1>Network Log Analysis</h1>
-                <button class="btn btn-primary" onclick="uploadLogs()">
-                    <i class="fas fa-upload"></i>
-                    Upload Logs
-                </button>
-            </div>
-
-            <div class="analysis-controls">
-                <div class="file-upload-area" id="file-drop-zone">
-                    <i class="fas fa-cloud-upload-alt"></i>
-                    <p>Drop log files here or click to browse</p>
-                    <input type="file" id="log-file-input" multiple accept=".log,.txt,.csv">
-                </div>
-
-                <div class="analysis-options">
-                    <label>
-                        <input type="checkbox" id="real-time-analysis" checked>
-                        Real-time Analysis
-                    </label>
-                    <label>
-                        <input type="checkbox" id="historical-comparison" checked>
-                        Historical Comparison
-                    </label>
-                    <label>
-                        <input type="checkbox" id="anomaly-detection" checked>
-                        Anomaly Detection
-                    </label>
-                </div>
-            </div>
-
-            <div class="analysis-results" id="analysis-results">
-                <!-- Results will be populated here -->
-            </div>
-        </section>
-
-        <!-- AI Models Section -->
-        <section id="models" class="content-section">
-            <div class="section-header">
-                <h1>AI Model Management</h1>
-                <div class="model-status">
-                    <span class="status-indicator online"></span>
-                    Models Online
-                </div>
-            </div>
-
-            <div class="models-grid">
-                <div class="model-card">
-                    <div class="model-header">
-                        <h3>IBM Granite 3.3 Instruct</h3>
-                        <span class="model-tag primary">Primary Reasoning</span>
-                    </div>
-                    <div class="model-description">
-                        <p>Core reasoning engine for analyzing network logs and generating actionable insights.</p>
-                    </div>
-                    <div class="model-controls">
-                        <textarea id="granite33-prompt" placeholder="Enter your analysis prompt for Granite 3.3..." rows="4"></textarea>
-                        <button class="btn btn-primary" onclick="queryGranite33()">
-                            <i class="fas fa-brain"></i>
-                            Analyze with Granite 3.3
-                        </button>
-                    </div>
-                    <div class="model-response" id="granite33-response"></div>
-                </div>
-
-                <div class="model-card">
-                    <div class="model-header">
-                        <h3>IBM Granite 4.0 Tiny</h3>
-                        <span class="model-tag secondary">Pattern Analysis</span>
-                    </div>
-                    <div class="model-description">
-                        <p>Long-context model for trend detection and historical pattern analysis.</p>
-                    </div>
-                    <div class="model-controls">
-                        <textarea id="granite40-prompt" placeholder="Enter your pattern analysis prompt for Granite 4.0..." rows="4"></textarea>
-                        <button class="btn btn-secondary" onclick="queryGranite40()">
+                    <div class="stat-card">
+                        <div class="stat-icon">
                             <i class="fas fa-chart-line"></i>
-                            Analyze with Granite 4.0
-                        </button>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Analysis Reports</h3>
+                            <div class="stat-value" id="reportCount">0</div>
+                        </div>
                     </div>
-                    <div class="model-response" id="granite40-response"></div>
+                </div>
+
+                <div class="dashboard-sections">
+                    <section class="recent-alerts">
+                        <h2>Recent Alerts</h2>
+                        <div id="recentAlerts" class="alerts-container">
+                            <!-- Alerts will be populated here -->
+                        </div>
+                    </section>
+
+                    <section class="network-overview">
+                        <h2>Network Overview</h2>
+                        <div id="networkChart" class="chart-container">
+                            <!-- Network traffic chart will be here -->
+                        </div>
+                    </section>
                 </div>
             </div>
 
-            <div class="combined-analysis">
-                <h3>Combined Model Analysis</h3>
-                <p>Use both models together for comprehensive network intelligence</p>
-                <textarea id="combined-prompt" placeholder="Enter comprehensive analysis prompt..." rows="3"></textarea>
-                <button class="btn btn-success" onclick="queryCombinedModels()">
-                    <i class="fas fa-cogs"></i>
-                    Run Combined Analysis
-                </button>
-                <div class="combined-response" id="combined-response"></div>
+            <!-- Network Monitor Tab -->
+            <div id="monitor" class="tab-content">
+                <div class="monitor-header">
+                    <h2>Real-time Network Monitoring</h2>
+                    <div class="monitor-controls">
+                        <button id="startMonitoring" class="btn btn-primary">
+                            <i class="fas fa-play"></i>
+                            Start Monitoring
+                        </button>
+                        <button id="stopMonitoring" class="btn btn-secondary" disabled>
+                            <i class="fas fa-stop"></i>
+                            Stop Monitoring
+                        </button>
+                        <button id="refreshDevices" class="btn btn-info">
+                            <i class="fas fa-sync"></i>
+                            Refresh
+                        </button>
+                    </div>
+                </div>
+
+                <div class="monitor-grid">
+                    <div class="devices-panel">
+                        <h3>Connected Devices</h3>
+                        <div id="devicesList" class="devices-list">
+                            <!-- Devices will be populated here -->
+                        </div>
+                    </div>
+
+                    <div class="traffic-panel">
+                        <h3>Live Traffic Data</h3>
+                        <div id="trafficData" class="traffic-data">
+                            <!-- Real-time traffic data -->
+                        </div>
+                    </div>
+                </div>
             </div>
-        </section>
 
-        <!-- Reports Section -->
-        <section id="reports" class="content-section">
-            <div class="section-header">
-                <h1>Analysis Reports</h1>
-                <button class="btn btn-primary" onclick="generateReport()">
-                    <i class="fas fa-file-alt"></i>
-                    Generate New Report
-                </button>
+            <!-- Log Analyzer Tab -->
+            <div id="analyzer" class="tab-content">
+                <div class="analyzer-header">
+                    <h2>Log Analysis</h2>
+                </div>
+
+                <div class="upload-section">
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Drop Wireshark logs here or click to browse</p>
+                        <small>Supports: .pcap, .pcapng, .cap, .txt, .log</small>
+                        <input type="file" id="logFileInput" accept=".pcap,.pcapng,.cap,.txt,.log" multiple hidden>
+                    </div>
+                </div>
+
+                <div class="uploaded-files">
+                    <h3>Uploaded Files</h3>
+                    <div id="uploadedFilesList" class="files-list">
+                        <!-- Uploaded files will be listed here -->
+                    </div>
+                </div>
+
+                <div class="analysis-results">
+                    <h3>Analysis Results</h3>
+                    <div id="analysisResults" class="results-container">
+                        <!-- Analysis results will be displayed here -->
+                    </div>
+                </div>
             </div>
 
-            <div class="reports-filters">
-                <select id="report-timeframe">
-                    <option value="24h">Last 24 Hours</option>
-                    <option value="7d">Last 7 Days</option>
-                    <option value="30d">Last 30 Days</option>
-                    <option value="custom">Custom Range</option>
-                </select>
-                <select id="report-type">
-                    <option value="security">Security Analysis</option>
-                    <option value="performance">Performance Report</option>
-                    <option value="comprehensive">Comprehensive Report</option>
-                </select>
+            <!-- AI Prompts Tab -->
+            <div id="prompts" class="tab-content">
+                <div class="prompts-header">
+                    <h2>AI Model Prompts</h2>
+                    <button id="clearPrompts" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>
+                        Clear All Prompts
+                    </button>
+                </div>
+
+                <div class="prompt-interface">
+                    <div class="model-selection">
+                        <label>
+                            <input type="radio" name="model" value="granite_3_3" checked>
+                            IBM Granite 3.3 Instruct (Primary Reasoning)
+                        </label>
+                        <label>
+                            <input type="radio" name="model" value="granite_4_0">
+                            IBM Granite 4.0 Tiny (Long-Context Analysis)
+                        </label>
+                    </div>
+
+                    <div class="prompt-input">
+                        <textarea id="promptText" placeholder="Enter your prompt for AI analysis..."></textarea>
+                        <button id="sendPrompt" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                            Send Prompt
+                        </button>
+                    </div>
+                </div>
+
+                <div class="prompt-history">
+                    <h3>Prompt History</h3>
+                    <div id="promptHistory" class="history-container">
+                        <!-- Prompt history will be displayed here -->
+                    </div>
+                </div>
             </div>
 
-            <div class="reports-list" id="reports-list">
-                <!-- Reports will be populated here -->
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="settings-header">
+                    <h2>System Settings</h2>
+                </div>
+
+                <div class="settings-sections">
+                    <section class="api-settings">
+                        <h3>API Configuration</h3>
+                        <div class="api-form">
+                            <div class="form-group">
+                                <label for="granite33Key">IBM Granite 3.3 Instruct API Key</label>
+                                <input type="password" id="granite33Key" placeholder="Enter API key...">
+                            </div>
+                            <div class="form-group">
+                                <label for="granite40Key">IBM Granite 4.0 Tiny API Key</label>
+                                <input type="password" id="granite40Key" placeholder="Enter API key...">
+                            </div>
+                            <button id="saveApiKeys" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                Save API Keys
+                            </button>
+                        </div>
+                    </section>
+
+                    <section class="monitoring-settings">
+                        <h3>Monitoring Configuration</h3>
+                        <div class="form-group">
+                            <label for="monitoringInterval">Data Collection Interval (seconds)</label>
+                            <input type="number" id="monitoringInterval" value="5" min="1" max="60">
+                        </div>
+                        <div class="form-group">
+                            <label for="alertThreshold">Alert Threshold (MB/s)</label>
+                            <input type="number" id="alertThreshold" value="100" min="1">
+                        </div>
+                    </section>
+                </div>
             </div>
-        </section>
-    </main>
+        </main>
+    </div>
 
-    <footer class="main-footer">
-        <p>&copy; 2025 AI NetSage. Enterprise Network Intelligence Platform.</p>
-    </footer>
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay hidden">
+        <div class="loading-spinner">
+            <i class="fas fa-spinner fa-spin"></i>
+            <p>Processing...</p>
+        </div>
+    </div>
 
-    <script src="js/main.js"></script>
-    <script src="js/dashboard.js"></script>
+    <!-- Scripts -->
     <script src="js/api.js"></script>
-    <script src="js/models.js"></script>
+    <script src="js/network-monitor.js"></script>
+    <script src="js/log-analyzer.js"></script>
+    <script src="js/dashboard.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>

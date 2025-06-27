@@ -1,106 +1,135 @@
-// API Client for REST API communication
-class ApiClient {
-    static baseUrl = 'server/api.php';
+// API handling and AJAX functions
+class API {
+    constructor() {
+        this.baseUrl = 'server/api/';
+    }
 
-    static async request(endpoint, options = {}) {
-        const url = `${this.baseUrl}?endpoint=${endpoint}`;
+    async request(endpoint, options = {}) {
+        const url = this.baseUrl + endpoint;
         const config = {
-            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
+                ...options.headers
             },
             ...options
         };
 
         try {
             const response = await fetch(url, config);
+            const data = await response.json();
+            
             if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
+                throw new Error(data.message || 'Request failed');
             }
-            return await response.json();
+            
+            return data;
         } catch (error) {
-            console.error('API request failed:', error);
+            console.error('API Request Error:', error);
             throw error;
         }
     }
 
-    static async post(endpoint, data) {
-        return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(data)
+    // Network data methods
+    async getNetworkDevices() {
+        return this.request('network-data.php?action=devices');
+    }
+
+    async getTrafficData(deviceId = null) {
+        const params = deviceId ? `?action=traffic&device_id=${deviceId}` : '?action=traffic';
+        return this.request('network-data.php' + params);
+    }
+
+    async startMonitoring() {
+        return this.request('network-data.php?action=start_monitoring', {
+            method: 'POST'
         });
     }
 
-    static async uploadLogs(formData) {
-        const url = `${this.baseUrl}?endpoint=upload_logs`;
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                body: formData
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return await response.json();
-        } catch (error) {
-            console.error('Log upload failed:', error);
-            throw error;
-        }
+    async stopMonitoring() {
+        return this.request('network-data.php?action=stop_monitoring', {
+            method: 'POST'
+        });
     }
 
-    // Dashboard endpoints
-    static async getRecentActivity() {
-        return this.request('recent_activity');
+    // Log analysis methods
+    async uploadLog(formData) {
+        return this.request('analyze-logs.php?action=upload', {
+            method: 'POST',
+            body: formData,
+            headers: {} // Remove Content-Type to let browser set it for FormData
+        });
     }
 
-    static async getAIInsights() {
-        return this.request('ai_insights');
+    async analyzeLog(logId) {
+        return this.request('analyze-logs.php?action=analyze', {
+            method: 'POST',
+            body: JSON.stringify({ log_id: logId })
+        });
     }
 
-    static async getTrendAnalysis() {
-        return this.request('trend_analysis');
+    async getAnalysisResults() {
+        return this.request('analyze-logs.php?action=results');
     }
 
-    static async getRecommendations() {
-        return this.request('recommendations');
+    async getUploadedLogs() {
+        return this.request('analyze-logs.php?action=logs');
     }
 
-    // Analysis endpoints
-    static async getAnalysisResults(analysisId) {
-        return this.request(`analysis_results&id=${analysisId}`);
+    async deleteLog(logId) {
+        return this.request('analyze-logs.php?action=delete', {
+            method: 'DELETE',
+            body: JSON.stringify({ log_id: logId })
+        });
     }
 
-    static async getAnalysisHistory() {
-        return this.request('analysis_history');
+    // Prompts methods
+    async sendPrompt(promptText, modelType) {
+        return this.request('prompts.php?action=send', {
+            method: 'POST',
+            body: JSON.stringify({
+                prompt: promptText,
+                model: modelType
+            })
+        });
     }
 
-    // Model endpoints
-    static async queryGranite33(prompt, context = '') {
-        return this.post('query_granite33', { prompt, context });
+    async getPromptHistory() {
+        return this.request('prompts.php?action=history');
     }
 
-    static async queryGranite40(prompt, context = '') {
-        return this.post('query_granite40', { prompt, context });
+    async deletePrompt(promptId) {
+        return this.request('prompts.php?action=delete', {
+            method: 'DELETE',
+            body: JSON.stringify({ prompt_id: promptId })
+        });
     }
 
-    static async queryCombinedModels(prompt, context = '') {
-        return this.post('query_combined', { prompt, context });
+    async clearAllPrompts() {
+        return this.request('prompts.php?action=clear', {
+            method: 'DELETE'
+        });
     }
 
-    static async getModelStatus() {
-        return this.request('model_status');
+    // Settings methods
+    async saveApiKeys(keys) {
+        return this.request('settings.php?action=save_keys', {
+            method: 'POST',
+            body: JSON.stringify(keys)
+        });
     }
 
-    // Reports endpoints
-    static async generateReport(timeframe, type) {
-        return this.post('generate_report', { timeframe, type });
+    async getApiKeys() {
+        return this.request('settings.php?action=get_keys');
     }
 
-    static async getReports() {
-        return this.request('reports');
+    async getDashboardStats() {
+        return this.request('network-data.php?action=stats');
     }
 
-    static async downloadReport(reportId) {
-        window.open(`${this.baseUrl}?endpoint=download_report&id=${reportId}`, '_blank');
+    async getAlerts() {
+        return this.request('network-data.php?action=alerts');
     }
 }
+
+// Global API instance
+window.api = new API();
