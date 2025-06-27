@@ -1,0 +1,211 @@
+/* Dashboard Styles */
+.status-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.status-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.status-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.status-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+    color: white;
+    font-size: 1.5rem;
+}
+
+.status-info h3 {
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    margin-bottom: 0.25rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.status-value {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+/* Models Section */
+.models-section {
+    margin-bottom: 3rem;
+}
+
+.models-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.models-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.model-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+    border: 1px solid var(--border-color);
+}
+
+.model-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.model-header h3 {
+    color: var(--text-primary);
+    font-size: 1.1rem;
+}
+
+.model-status {
+    padding: 0.25rem 0.75rem;
+    border-radius: 1rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.model-status.active {
+    background: var(--success-color);
+    color: white;
+}
+
+.model-status.inactive {
+    background: var(--secondary-color);
+    color: white;
+}
+
+.model-card p {
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.model-metrics {
+    padding-top: 1rem;
+    border-top: 1px solid var(--border-color);
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+/* Insights Section */
+.insights-section h2 {
+    margin-bottom: 1.5rem;
+    color: var(--text-primary);
+}
+
+.insights-container {
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: var(--shadow);
+    min-height: 300px;
+    padding: 1.5rem;
+}
+
+.insight-item {
+    padding: 1rem;
+    border-left: 4px solid var(--primary-color);
+    background: #f8fafc;
+    margin-bottom: 1rem;
+    border-radius: 0 0.5rem 0.5rem 0;
+}
+
+.insight-item.warning {
+    border-left-color: var(--warning-color);
+    background: #fefce8;
+}
+
+.insight-item.danger {
+    border-left-color: var(--danger-color);
+    background: #fef2f2;
+}
+
+.insight-item.success {
+    border-left-color: var(--success-color);
+    background: #f0fdf4;
+}
+
+.insight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+}
+
+.insight-title {
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.insight-time {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.insight-description {
+    color: var(--text-secondary);
+    line-height: 1.5;
+    margin-bottom: 0.5rem;
+}
+
+.insight-actions {
+    margin-top: 1rem;
+}
+
+.insight-action {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    background: var(--primary-color);
+    color: white;
+    text-decoration: none;
+    border-radius: 0.25rem;
+    font-size: 0.8rem;
+    margin-right: 0.5rem;
+    transition: background 0.3s ease;
+}
+
+.insight-action:hover {
+    background: #1d4ed8;
+}
+
+@media (max-width: 768px) {
+    .status-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .models-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .model-card {
+        min-width: unset;
+    }
+}
