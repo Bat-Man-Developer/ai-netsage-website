@@ -1,121 +1,106 @@
-// API client for communication with backend
+// API Client for REST API communication
 class ApiClient {
-    constructor() {
-        this.baseUrl = '/ai-netsage/server/';
-        this.timeout = 30000; // 30 seconds
-    }
+    static baseUrl = 'server/api.php';
 
-    async request(endpoint, options = {}) {
-        const url = this.baseUrl + endpoint;
+    static async request(endpoint, options = {}) {
+        const url = `${this.baseUrl}?endpoint=${endpoint}`;
         const config = {
-            method: options.method || 'GET',
+            method: 'GET',
             headers: {
                 'Content-Type': 'application/json',
-                ...options.headers
             },
-            signal: AbortSignal.timeout(this.timeout),
             ...options
         };
 
-        if (options.data) {
-            config.body = JSON.stringify(options.data);
-        }
-
         try {
             const response = await fetch(url, config);
-            
             if (!response.ok) {
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
-
-            const data = await response.json();
-            return data;
+            return await response.json();
         } catch (error) {
             console.error('API request failed:', error);
             throw error;
         }
     }
 
+    static async post(endpoint, data) {
+        return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(data)
+        });
+    }
+
+    static async uploadLogs(formData) {
+        const url = `${this.baseUrl}?endpoint=upload_logs`;
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData
+            });
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return await response.json();
+        } catch (error) {
+            console.error('Log upload failed:', error);
+            throw error;
+        }
+    }
+
     // Dashboard endpoints
-    async getDashboardStatus() {
-        return this.request('dashboard/status');
+    static async getRecentActivity() {
+        return this.request('recent_activity');
     }
 
-    async getInsights() {
-        return this.request('dashboard/insights');
+    static async getAIInsights() {
+        return this.request('ai_insights');
     }
 
-    async getModelStatus() {
-        return this.request('dashboard/models');
+    static async getTrendAnalysis() {
+        return this.request('trend_analysis');
+    }
+
+    static async getRecommendations() {
+        return this.request('recommendations');
     }
 
     // Analysis endpoints
-    async runAnalysis(timeframe = '24h') {
-        return this.request('analysis/run', {
-            method: 'POST',
-            data: { timeframe }
-        });
+    static async getAnalysisResults(analysisId) {
+        return this.request(`analysis_results&id=${analysisId}`);
     }
 
-    async getAnalysisHistory() {
-        return this.request('analysis/history');
+    static async getAnalysisHistory() {
+        return this.request('analysis_history');
     }
 
-    // Logs endpoints
-    async getLogs(limit = 100, search = '') {
-        const params = new URLSearchParams({ limit, search });
-        return this.request(`logs/recent?${params}`);
+    // Model endpoints
+    static async queryGranite33(prompt, context = '') {
+        return this.post('query_granite33', { prompt, context });
     }
 
-    async addLog(logData) {
-        return this.request('logs/add', {
-            method: 'POST',
-            data: logData
-        });
+    static async queryGranite40(prompt, context = '') {
+        return this.post('query_granite40', { prompt, context });
     }
 
-    // Settings endpoints
-    async getSettings() {
-        return this.request('settings/get');
+    static async queryCombinedModels(prompt, context = '') {
+        return this.post('query_combined', { prompt, context });
     }
 
-    async updateSettings(settings) {
-        return this.request('settings/update', {
-            method: 'POST',
-            data: settings
-        });
+    static async getModelStatus() {
+        return this.request('model_status');
     }
-}
 
-// Create global API instance
-const api = new ApiClient();
-
-// Error handling for API calls
-function handleApiError(error, context = '') {
-    console.error(`API Error ${context}:`, error);
-    
-    let message = 'An error occurred while communicating with the server.';
-    
-    if (error.name === 'AbortError') {
-        message = 'Request timed out. Please try again.';
-    } else if (error.message.includes('Failed to fetch')) {
-        message = 'Unable to connect to server. Please check your internet connection.';
+    // Reports endpoints
+    static async generateReport(timeframe, type) {
+        return this.post('generate_report', { timeframe, type });
     }
-    
-    Utils.showNotification(message, 'error');
-    return { success: false, error: message };
-}
 
-// Retry mechanism for failed requests
-async function retryApiCall(apiFunction, maxRetries = 3, delay = 1000) {
-    for (let i = 0; i < maxRetries; i++) {
-        try {
-            return await apiFunction();
-        } catch (error) {
-            if (i === maxRetries - 1) {
-                throw error;
-            }
-            await new Promise(resolve => setTimeout(resolve, delay * Math.pow(2, i)));
-        }
+    static async getReports() {
+        return this.request('reports');
+    }
+
+    static async downloadReport(reportId) {
+        window.open(`${this.baseUrl}?endpoint=download_report&id=${reportId}`, '_blank');
     }
 }

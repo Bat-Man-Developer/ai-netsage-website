@@ -1,175 +1,228 @@
-// Dashboard module
-const Dashboard = {
-    updateInterval: null,
-    isActive: false,
+// Dashboard-specific functionality
+class Dashboard {
+    constructor() {
+        this.charts = {};
+        this.init();
+    }
 
     init() {
-        this.bindEvents();
-        this.startAutoUpdate();
-        EventBus.on('sectionChanged', (section) => {
-            this.isActive = section === 'dashboard';
-            if (this.isActive) {
-                this.loadData();
+        this.setupRealTimeUpdates();
+        this.setupInteractivity();
+    }
+
+    setupRealTimeUpdates() {
+        // Real-time data updates every 10 seconds
+        setInterval(() => {
+            if (document.getElementById('dashboard').classList.contains('active')) {
+                this.updateRealTimeData();
             }
+        }, 10000);
+    }
+
+    setupInteractivity() {
+        // Add click handlers for status cards
+        document.querySelectorAll('.status-card').forEach(card => {
+            card.addEventListener('click', () => {
+                this.showStatusDetails(card);
+            });
         });
-    },
 
-    bindEvents() {
-        // Refresh button (if exists)
-        const refreshBtn = document.getElementById('refresh-dashboard');
-        if (refreshBtn) {
-            refreshBtn.addEventListener('click', () => this.loadData());
-        }
-    },
-
-    async loadData() {
-        try {
-            // Load all dashboard data in parallel
-            const [statusResult, insightsResult, modelsResult] = await Promise.all([
-                api.getDashboardStatus().catch(e => handleApiError(e, 'getting dashboard status')),
-                api.getInsights().catch(e => handleApiError(e, 'getting insights')),
-                api.getModelStatus().catch(e => handleApiError(e, 'getting model status'))
-            ]);
-
-            if (statusResult && statusResult.success) {
-                this.updateStatusCards(statusResult.data);
-            }
-
-            if (insightsResult && insightsResult.success) {
-                this.updateInsights(insightsResult.data);
-            }
-
-            if (modelsResult && modelsResult.success) {
-                this.updateModelStatus(modelsResult.data);
-            }
-
-        } catch (error) {
-            console.error('Dashboard load error:', error);
-        }
-    },
-
-    updateStatusCards(data) {
-        const elements = {
-            'security-status': data.security_status || 'Unknown',
-            'traffic-status': data.traffic_status || 'Unknown',
-            'anomaly-count': data.anomaly_count || 0,
-            'last-update': Utils.formatRelativeTime(data.last_update)
-        };
-
-        Object.entries(elements).forEach(([id, value]) => {
-            const element = document.getElementById(id);
-            if (element) {
-                if (id === 'anomaly-count' && element.textContent !== value.toString()) {
-                    Utils.animateCounter(element, value);
-                } else {
-                    element.textContent = value;
-                }
-            }
+        // Add refresh buttons to widgets
+        document.querySelectorAll('.widget').forEach(widget => {
+            this.addRefreshButton(widget);
         });
-    },
+    }
 
-    updateModelStatus(data) {
-        // Update Granite 3.3 status
-        const granite33Status = document.getElementById('granite33-status');
-        const granite33Processed = document.getElementById('granite33-processed');
-        
-        if (granite33Status && data.granite33) {
-            granite33Status.textContent = data.granite33.status === 'active' ? 'Active' : 'Inactive';
-            granite33Status.className = `model-status ${data.granite33.status}`;
-        }
-        
-        if (granite33Processed && data.granite33) {
-            Utils.animateCounter(granite33Processed, data.granite33.processed_logs);
-        }
-
-        // Update Granite 4.0 status
-        const granite40Status = document.getElementById('granite40-status');
-        const granite40Analyzed = document.getElementById('granite40-analyzed');
-        
-        if (granite40Status && data.granite40) {
-            granite40Status.textContent = data.granite40.status === 'active' ? 'Active' : 'Inactive';
-            granite40Status.className = `model-status ${data.granite40.status}`;
-        }
-        
-        if (granite40Analyzed && data.granite40) {
-            Utils.animateCounter(granite40Analyzed, data.granite40.analyzed_patterns);
-        }
-    },
-
-    updateInsights(insights) {
-        const container = document.getElementById('insights-container');
-        if (!container) return;
-
-        if (!insights || insights.length === 0) {
-            container.innerHTML = `
-                <div class="loading-spinner">
-                    <i class="fas fa-info-circle"></i>
-                    <span>No new insights available</span>
-                </div>
+    addRefreshButton(widget) {
+        const header = widget.querySelector('h3');
+        if (header) {
+            const refreshBtn = document.createElement('button');
+            refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i>';
+            refreshBtn.className = 'widget-refresh-btn';
+            refreshBtn.style.cssText = `
+                float: right;
+                background: rgba(255,255,255,0.2);
+                border: none;
+                color: white;
+                padding: 0.25rem 0.5rem;
+                border-radius: 0.25rem;
+                cursor: pointer;
+                font-size: 0.75rem;
             `;
-            return;
-        }
-
-        const insightsHtml = insights.map(insight => `
-            <div class="insight-item ${insight.type}">
-                <div class="insight-header">
-                    <span class="insight-title">${Utils.escapeHtml(insight.title)}</span>
-                    <span class="insight-time">${Utils.formatRelativeTime(insight.timestamp)}</span>
-                </div>
-                <div class="insight-description">
-                    ${Utils.escapeHtml(insight.description)}
-                </div>
-                <div class="insight-meta">
-                    <small>Analyzed by ${insight.model} (${insight.confidence}% confidence)</small>
-                </div>
-                ${insight.actions && insight.actions.length > 0 ? `
-                    <div class="insight-actions">
-                        ${insight.actions.map(action => `
-                            <a href="#" class="insight-action" onclick="Dashboard.handleInsightAction('${insight.id}', '${action}')">
-                                ${action}
-                            </a>
-                        `).join('')}
-                    </div>
-                ` : ''}
-            </div>
-        `).join('');
-
-        container.innerHTML = insightsHtml;
-    },
-
-    handleInsightAction(insightId, action) {
-        console.log(`Handling action "${action}" for insight ${insightId}`);
-        Utils.showNotification(`Action "${action}" initiated for insight`, 'info');
-        
-        // Here you would implement specific actions based on the action type
-        switch (action) {
-            case 'Block IP':
-                // Implement IP blocking logic
-                break;
-            case 'Monitor User':
-                // Implement user monitoring logic
-                break;
-            case 'Generate Report':
-                // Implement report generation logic
-                break;
-            default:
-                console.log('Unknown action:', action);
-        }
-    },
-
-    startAutoUpdate() {
-        // Update every 30 seconds when dashboard is active
-        this.updateInterval = setInterval(() => {
-            if (this.isActive) {
-                this.loadData();
-            }
-        }, 30000);
-    },
-
-    stopAutoUpdate() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
+            refreshBtn.onclick = () => this.refreshWidget(widget);
+            header.appendChild(refreshBtn);
         }
     }
-};
+
+    async refreshWidget(widget) {
+        const widgetId = widget.querySelector('div[id]')?.id;
+        if (!widgetId) return;
+
+        const refreshBtn = widget.querySelector('.widget-refresh-btn i');
+        if (refreshBtn) {
+            refreshBtn.style.animation = 'spin 1s linear infinite';
+        }
+
+        try {
+            switch (widgetId) {
+                case 'activity-logs':
+                    const activity = await ApiClient.getRecentActivity();
+                    app.updateActivityLogs(activity);
+                    break;
+                case 'ai-insights':
+                    const insights = await ApiClient.getAIInsights();
+                    app.updateAIInsights(insights);
+                    break;
+                case 'trend-analysis':
+                    const trends = await ApiClient.getTrendAnalysis();
+                    app.updateTrendAnalysis(trends);
+                    break;
+                case 'recommendations':
+                    const recommendations = await ApiClient.getRecommendations();
+                    app.updateRecommendations(recommendations);
+                    break;
+            }
+        } catch (error) {
+            console.error('Failed to refresh widget:', error);
+        } finally {
+            if (refreshBtn) {
+                refreshBtn.style.animation = '';
+            }
+        }
+    }
+
+    async updateRealTimeData() {
+        try {
+            const realtimeData = await ApiClient.request('realtime_data');
+            this.updateStatusCounters(realtimeData);
+            this.updateActivityStream(realtimeData.recent_events);
+        } catch (error) {
+            console.error('Failed to update real-time data:', error);
+        }
+    }
+
+    updateStatusCounters(data) {
+        if (data.security_status) {
+            document.getElementById('security-status').textContent = data.security_status;
+        }
+        if (data.monitoring_count !== undefined) {
+            document.getElementById('monitoring-count').textContent = data.monitoring_count;
+        }
+        if (data.anomaly_count !== undefined) {
+            document.getElementById('anomaly-count').textContent = data.anomaly_count;
+        }
+    }
+
+    updateActivityStream(events) {
+        if (!events || events.length === 0) return;
+
+        const container = document.getElementById('activity-logs');
+        const existingEntries = container.querySelectorAll('.log-entry');
+        
+        // Add new events to the top
+        events.forEach(event => {
+            const entry = document.createElement('div');
+            entry.className = `log-entry ${event.severity || ''}`;
+            entry.innerHTML = `
+                <div class="log-timestamp">${new Date(event.timestamp).toLocaleString()}</div>
+                <div class="log-message">${event.message}</div>
+            `;
+            entry.style.opacity = '0';
+            entry.style.transform = 'translateY(-10px)';
+            
+            container.insertBefore(entry, container.firstChild);
+            
+            // Animate in
+            setTimeout(() => {
+                entry.style.transition = 'all 0.3s ease';
+                entry.style.opacity = '1';
+                entry.style.transform = 'translateY(0)';
+            }, 100);
+        });
+
+        // Remove old entries if too many
+        const allEntries = container.querySelectorAll('.log-entry');
+        if (allEntries.length > 10) {
+            for (let i = 10; i < allEntries.length; i++) {
+                allEntries[i].remove();
+            }
+        }
+    }
+
+    showStatusDetails(card) {
+        const label = card.querySelector('.status-label').textContent;
+        const value = card.querySelector('.status-value').textContent;
+        
+        // Show modal or detailed view
+        const modal = this.createModal(`${label} Details`, `
+            <p>Current Status: <strong>${value}</strong></p>
+            <p>Last Updated: ${new Date().toLocaleString()}</p>
+            <p>Additional details about ${label.toLowerCase()} would be displayed here.</p>
+        `);
+        
+        document.body.appendChild(modal);
+    }
+
+    createModal(title, content) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        `;
+        
+        modal.innerHTML = `
+            <div class="modal-content" style="
+                background: white;
+                padding: 2rem;
+                border-radius: 0.75rem;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            ">
+                <div class="modal-header" style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 1rem;
+                    padding-bottom: 1rem;
+                    border-bottom: 1px solid var(--border-color);
+                ">
+                    <h3>${title}</h3>
+                    <button class="close-modal" style="
+                        background: none;
+                        border: none;
+                        font-size: 1.5rem;
+                        cursor: pointer;
+                        color: var(--secondary-color);
+                    ">&times;</button>
+                </div>
+                <div class="modal-body">
+                    ${content}
+                </div>
+            </div>
+        `;
+        
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal || e.target.classList.contains('close-modal')) {
+                modal.remove();
+            }
+        });
+        
+        return modal;
+    }
+}
+
+// Initialize dashboard when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    new Dashboard();
+});
