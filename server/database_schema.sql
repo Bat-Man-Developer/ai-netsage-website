@@ -1,5 +1,4 @@
 -- AI NetSage Database Schema
-USE ai_netsage_database;
 
 -- Network logs table
 CREATE TABLE network_logs (
