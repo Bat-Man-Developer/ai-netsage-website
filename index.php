@@ -6,8 +6,8 @@
     <title>AI NetSage - Intelligent Network Analysis</title>
     <link rel="stylesheet" href="assets/styles/main.css">
     <link rel="stylesheet" href="assets/styles/dashboard.css">
-    <link rel="stylesheet" href="assets/styles/components.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="assets/styles/forms.css">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
 </head>
 <body>
     <div class="app-container">
@@ -15,254 +15,273 @@
         <header class="main-header">
             <div class="header-content">
                 <div class="logo">
-                    <i class="fas fa-network-wired"></i>
                     <h1>AI NetSage</h1>
+                    <span class="tagline">Enterprise Network Intelligence</span>
                 </div>
                 <nav class="main-nav">
-                    <button class="nav-btn active" data-tab="dashboard">
-                        <i class="fas fa-tachometer-alt"></i>
-                        Dashboard
-                    </button>
-                    <button class="nav-btn" data-tab="monitor">
-                        <i class="fas fa-desktop"></i>
-                        Network Monitor
-                    </button>
-                    <button class="nav-btn" data-tab="analyzer">
-                        <i class="fas fa-brain"></i>
-                        Log Analyzer
-                    </button>
-                    <button class="nav-btn" data-tab="prompts">
-                        <i class="fas fa-comments"></i>
-                        AI Prompts
-                    </button>
-                    <button class="nav-btn" data-tab="settings">
-                        <i class="fas fa-cog"></i>
-                        Settings
-                    </button>
+                    <button class="nav-btn active" data-section="dashboard">Dashboard</button>
+                    <button class="nav-btn" data-section="models">AI Models</button>
+                    <button class="nav-btn" data-section="upload">Log Analysis</button>
+                    <button class="nav-btn" data-section="realtime">Real-time Monitor</button>
+                    <button class="nav-btn" data-section="reports">Reports</button>
+                    <button class="nav-btn" data-section="settings">Settings</button>
                 </nav>
             </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Dashboard Tab -->
-            <div id="dashboard" class="tab-content active">
+            <!-- Dashboard Section -->
+            <section id="dashboard" class="content-section active">
                 <div class="dashboard-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-wifi"></i>
+                    <div class="stats-card">
+                        <h3>System Status</h3>
+                        <div class="status-indicator">
+                            <span class="status-dot online"></span>
+                            <span>Online</span>
                         </div>
-                        <div class="stat-info">
-                            <h3>Active Devices</h3>
-                            <div class="stat-value" id="activeDevices">0</div>
+                        <div class="stat-item">
+                            <span class="stat-label">Last Analysis:</span>
+                            <span class="stat-value" id="lastAnalysisTime">--</span>
                         </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-exclamation-triangle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Alerts</h3>
-                            <div class="stat-value" id="alertCount">0</div>
+                        <div class="stat-item">
+                            <span class="stat-label">Total Sessions:</span>
+                            <span class="stat-value" id="totalSessions">0</span>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-upload"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Data Transfer</h3>
-                            <div class="stat-value" id="dataTransfer">0 MB</div>
+
+                    <div class="stats-card">
+                        <h3>Anomaly Detection</h3>
+                        <div class="anomaly-summary">
+                            <div class="anomaly-count critical">
+                                <span class="count" id="criticalAnomalies">0</span>
+                                <span class="label">Critical</span>
+                            </div>
+                            <div class="anomaly-count high">
+                                <span class="count" id="highAnomalies">0</span>
+                                <span class="label">High</span>
+                            </div>
+                            <div class="anomaly-count medium">
+                                <span class="count" id="mediumAnomalies">0</span>
+                                <span class="label">Medium</span>
+                            </div>
+                            <div class="anomaly-count low">
+                                <span class="count" id="lowAnomalies">0</span>
+                                <span class="label">Low</span>
+                            </div>
                         </div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
+
+                    <div class="stats-card">
+                        <h3>Real-time Activity</h3>
+                        <div class="activity-feed" id="activityFeed">
+                            <div class="activity-item">Monitoring initialized...</div>
                         </div>
-                        <div class="stat-info">
-                            <h3>Analysis Reports</h3>
-                            <div class="stat-value" id="reportCount">0</div>
+                    </div>
+
+                    <div class="stats-card full-width">
+                        <h3>Recent Recommendations</h3>
+                        <div class="recommendations-list" id="recommendationsList">
+                            <div class="recommendation-item">
+                                <span class="recommendation-type">Security</span>
+                                <span class="recommendation-text">System monitoring active</span>
+                                <span class="recommendation-time">Just now</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="dashboard-sections">
-                    <section class="recent-alerts">
-                        <h2>Recent Alerts</h2>
-                        <div id="recentAlerts" class="alerts-container">
-                            <!-- Alerts will be populated here -->
-                        </div>
-                    </section>
+            <!-- AI Models Section -->
+            <section id="models" class="content-section">
+                <div class="models-container">
+                    <h2>AI Model Interface</h2>
+                    
+                    <!-- IBM Granite 3.3 Instruct -->
+                    <div class="model-card">
+                        <h3>IBM Granite 3.3 Instruct</h3>
+                        <p class="model-description">Primary reasoning engine for real-time log analysis and anomaly detection</p>
+                        <form class="model-form" id="granite33Form">
+                            <div class="form-group">
+                                <label for="granite33Prompt">Prompt:</label>
+                                <textarea id="granite33Prompt" name="prompt" rows="4" placeholder="Enter your analysis prompt..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="granite33SavePrompt">Save Prompt As:</label>
+                                <input type="text" id="granite33SavePrompt" name="save_name" placeholder="Optional: Save this prompt for later use">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Analyze</button>
+                                <button type="button" class="btn-secondary" onclick="loadSavedPrompts('granite_33')">Load Saved</button>
+                            </div>
+                        </form>
+                        <div class="model-response" id="granite33Response"></div>
+                    </div>
 
-                    <section class="network-overview">
-                        <h2>Network Overview</h2>
-                        <div id="networkChart" class="chart-container">
-                            <!-- Network traffic chart will be here -->
-                        </div>
-                    </section>
+                    <!-- IBM Granite 4.0 Tiny -->
+                    <div class="model-card">
+                        <h3>IBM Granite 4.0 Tiny</h3>
+                        <p class="model-description">Long-context pattern analysis for historical trend detection</p>
+                        <form class="model-form" id="granite40Form">
+                            <div class="form-group">
+                                <label for="granite40Prompt">Prompt:</label>
+                                <textarea id="granite40Prompt" name="prompt" rows="4" placeholder="Enter your trend analysis prompt..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="granite40SavePrompt">Save Prompt As:</label>
+                                <input type="text" id="granite40SavePrompt" name="save_name" placeholder="Optional: Save this prompt for later use">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Analyze</button>
+                                <button type="button" class="btn-secondary" onclick="loadSavedPrompts('granite_40')">Load Saved</button>
+                            </div>
+                        </form>
+                        <div class="model-response" id="granite40Response"></div>
+                    </div>
+
+                    <!-- Combined Models -->
+                    <div class="model-card">
+                        <h3>Combined Analysis</h3>
+                        <p class="model-description">Comprehensive analysis using both models for complete network intelligence</p>
+                        <form class="model-form" id="combinedForm">
+                            <div class="form-group">
+                                <label for="combinedPrompt">Prompt:</label>
+                                <textarea id="combinedPrompt" name="prompt" rows="4" placeholder="Enter your comprehensive analysis prompt..."></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="combinedSavePrompt">Save Prompt As:</label>
+                                <input type="text" id="combinedSavePrompt" name="save_name" placeholder="Optional: Save this prompt for later use">
+                            </div>
+                            <div class="form-actions">
+                                <button type="submit" class="btn-primary">Analyze</button>
+                                <button type="button" class="btn-secondary" onclick="loadSavedPrompts('combined')">Load Saved</button>
+                            </div>
+                        </form>
+                        <div class="model-response" id="combinedResponse"></div>
+                    </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Network Monitor Tab -->
-            <div id="monitor" class="tab-content">
-                <div class="monitor-header">
+            <!-- Log Upload Section -->
+            <section id="upload" class="content-section">
+                <div class="upload-container">
+                    <h2>Log File Analysis</h2>
+                    <div class="upload-card">
+                        <div class="upload-area" id="uploadArea">
+                            <div class="upload-icon">📁</div>
+                            <h3>Upload Network Logs</h3>
+                            <p>Supported formats: .pcap, .pcapng, .cap, .log, .txt, .csv, .json, .xml</p>
+                            <input type="file" id="fileInput" multiple accept=".pcap,.pcapng,.cap,.log,.txt,.csv,.json,.xml">
+                            <button class="btn-primary" onclick="document.getElementById('fileInput').click()">Choose Files</button>
+                        </div>
+                        <div class="upload-progress" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <span class="progress-text" id="progressText">0%</span>
+                        </div>
+                    </div>
+                    <div class="analysis-results" id="analysisResults"></div>
+                </div>
+            </section>
+
+            <!-- Real-time Monitoring Section -->
+            <section id="realtime" class="content-section">
+                <div class="realtime-container">
                     <h2>Real-time Network Monitoring</h2>
-                    <div class="monitor-controls">
-                        <button id="startMonitoring" class="btn btn-primary">
-                            <i class="fas fa-play"></i>
-                            Start Monitoring
-                        </button>
-                        <button id="stopMonitoring" class="btn btn-secondary" disabled>
-                            <i class="fas fa-stop"></i>
-                            Stop Monitoring
-                        </button>
-                        <button id="refreshDevices" class="btn btn-info">
-                            <i class="fas fa-sync"></i>
-                            Refresh
-                        </button>
-                    </div>
-                </div>
-
-                <div class="monitor-grid">
-                    <div class="devices-panel">
-                        <h3>Connected Devices</h3>
-                        <div id="devicesList" class="devices-list">
-                            <!-- Devices will be populated here -->
+                    <div class="monitoring-controls">
+                        <button id="startMonitoring" class="btn-primary">Start Monitoring</button>
+                        <button id="stopMonitoring" class="btn-secondary" disabled>Stop Monitoring</button>
+                        <div class="monitor-status">
+                            <span class="status-indicator" id="monitorStatus">Stopped</span>
                         </div>
                     </div>
-
-                    <div class="traffic-panel">
-                        <h3>Live Traffic Data</h3>
-                        <div id="trafficData" class="traffic-data">
-                            <!-- Real-time traffic data -->
+                    <div class="monitoring-grid">
+                        <div class="monitor-card">
+                            <h3>Network Traffic</h3>
+                            <div class="traffic-stats">
+                                <div class="stat">
+                                    <span class="stat-label">Inbound:</span>
+                                    <span class="stat-value" id="inboundTraffic">0 MB</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-label">Outbound:</span>
+                                    <span class="stat-value" id="outboundTraffic">0 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="monitor-card">
+                            <h3>Active Connections</h3>
+                            <div class="connections-list" id="connectionsList"></div>
+                        </div>
+                        <div class="monitor-card full-width">
+                            <h3>Live Traffic Log</h3>
+                            <div class="traffic-log" id="trafficLog"></div>
                         </div>
                     </div>
                 </div>
-            </div>
+            </section>
 
-            <!-- Log Analyzer Tab -->
-            <div id="analyzer" class="tab-content">
-                <div class="analyzer-header">
-                    <h2>Log Analysis</h2>
-                </div>
-
-                <div class="upload-section">
-                    <div class="upload-area" id="uploadArea">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Drop Wireshark logs here or click to browse</p>
-                        <small>Supports: .pcap, .pcapng, .cap, .txt, .log</small>
-                        <input type="file" id="logFileInput" accept=".pcap,.pcapng,.cap,.txt,.log" multiple hidden>
+            <!-- Reports Section -->
+            <section id="reports" class="content-section">
+                <div class="reports-container">
+                    <h2>Analysis Reports</h2>
+                    <div class="report-controls">
+                        <button class="btn-primary" id="generateReport">Generate New Report</button>
+                        <select id="reportType">
+                            <option value="daily">Daily Report</option>
+                            <option value="weekly">Weekly Report</option>
+                            <option value="custom">Custom Report</option>
+                        </select>
                     </div>
+                    <div class="reports-list" id="reportsList"></div>
                 </div>
+            </section>
 
-                <div class="uploaded-files">
-                    <h3>Uploaded Files</h3>
-                    <div id="uploadedFilesList" class="files-list">
-                        <!-- Uploaded files will be listed here -->
-                    </div>
-                </div>
-
-                <div class="analysis-results">
-                    <h3>Analysis Results</h3>
-                    <div id="analysisResults" class="results-container">
-                        <!-- Analysis results will be displayed here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- AI Prompts Tab -->
-            <div id="prompts" class="tab-content">
-                <div class="prompts-header">
-                    <h2>AI Model Prompts</h2>
-                    <button id="clearPrompts" class="btn btn-danger">
-                        <i class="fas fa-trash"></i>
-                        Clear All Prompts
-                    </button>
-                </div>
-
-                <div class="prompt-interface">
-                    <div class="model-selection">
-                        <label>
-                            <input type="radio" name="model" value="granite_3_3" checked>
-                            IBM Granite 3.3 Instruct (Primary Reasoning)
-                        </label>
-                        <label>
-                            <input type="radio" name="model" value="granite_4_0">
-                            IBM Granite 4.0 Tiny (Long-Context Analysis)
-                        </label>
-                    </div>
-
-                    <div class="prompt-input">
-                        <textarea id="promptText" placeholder="Enter your prompt for AI analysis..."></textarea>
-                        <button id="sendPrompt" class="btn btn-primary">
-                            <i class="fas fa-paper-plane"></i>
-                            Send Prompt
-                        </button>
-                    </div>
-                </div>
-
-                <div class="prompt-history">
-                    <h3>Prompt History</h3>
-                    <div id="promptHistory" class="history-container">
-                        <!-- Prompt history will be displayed here -->
-                    </div>
-                </div>
-            </div>
-
-            <!-- Settings Tab -->
-            <div id="settings" class="tab-content">
-                <div class="settings-header">
-                    <h2>System Settings</h2>
-                </div>
-
-                <div class="settings-sections">
-                    <section class="api-settings">
-                        <h3>API Configuration</h3>
-                        <div class="api-form">
+            <!-- Settings Section -->
+            <section id="settings" class="content-section">
+                <div class="settings-container">
+                    <h2>API Configuration</h2>
+                    <form id="apiSettingsForm" class="settings-form">
+                        <div class="api-config">
+                            <h3>IBM Granite 3.3 Instruct</h3>
                             <div class="form-group">
-                                <label for="granite33Key">IBM Granite 3.3 Instruct API Key</label>
-                                <input type="password" id="granite33Key" placeholder="Enter API key...">
+                                <label for="granite33ApiKey">API Key:</label>
+                                <input type="password" id="granite33ApiKey" name="granite33_key" placeholder="Enter API key">
                             </div>
                             <div class="form-group">
-                                <label for="granite40Key">IBM Granite 4.0 Tiny API Key</label>
-                                <input type="password" id="granite40Key" placeholder="Enter API key...">
+                                <label for="granite33Endpoint">Endpoint URL:</label>
+                                <input type="url" id="granite33Endpoint" name="granite33_endpoint" placeholder="https://api.ibm.com/granite/3.3/instruct">
                             </div>
-                            <button id="saveApiKeys" class="btn btn-primary">
-                                <i class="fas fa-save"></i>
-                                Save API Keys
-                            </button>
                         </div>
-                    </section>
-
-                    <section class="monitoring-settings">
-                        <h3>Monitoring Configuration</h3>
-                        <div class="form-group">
-                            <label for="monitoringInterval">Data Collection Interval (seconds)</label>
-                            <input type="number" id="monitoringInterval" value="5" min="1" max="60">
+                        
+                        <div class="api-config">
+                            <h3>IBM Granite 4.0 Tiny</h3>
+                            <div class="form-group">
+                                <label for="granite40ApiKey">API Key:</label>
+                                <input type="password" id="granite40ApiKey" name="granite40_key" placeholder="Enter API key">
+                            </div>
+                            <div class="form-group">
+                                <label for="granite40Endpoint">Endpoint URL:</label>
+                                <input type="url" id="granite40Endpoint" name="granite40_endpoint" placeholder="https://api.ibm.com/granite/4.0/tiny">
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="alertThreshold">Alert Threshold (MB/s)</label>
-                            <input type="number" id="alertThreshold" value="100" min="1">
+                        
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">Save Configuration</button>
+                            <button type="button" class="btn-secondary" id="testConnection">Test Connection</button>
                         </div>
-                    </section>
+                    </form>
                 </div>
-            </div>
+            </section>
         </main>
     </div>
 
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay hidden">
-        <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Processing...</p>
-        </div>
-    </div>
-
     <!-- Scripts -->
-    <script src="js/api.js"></script>
-    <script src="js/network-monitor.js"></script>
-    <script src="js/log-analyzer.js"></script>
+    <script src="js/main.js"></script>
     <script src="js/dashboard.js"></script>
-    <script src="js/app.js"></script>
+    <script src="js/models.js"></script>
+    <script src="js/upload.js"></script>
+    <script src="js/realtime.js"></script>
 </body>
 </html>

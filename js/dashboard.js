@@ -1,118 +1,154 @@
-// Dashboard functionality
+// Dashboard Management
 class Dashboard {
     constructor() {
-        this.initializeElements();
-        this.loadDashboardData();
-        this.startAutoRefresh();
-    }
-
-    initializeElements() {
-        this.activeDevicesElement = document.getElementById('activeDevices');
-        this.alertCountElement = document.getElementById('alertCount');
-        this.dataTransferElement = document.getElementById('dataTransfer');
-        this.reportCountElement = document.getElementById('reportCount');
-        this.recentAlertsElement = document.getElementById('recentAlerts');
-        this.networkChartElement = document.getElementById('networkChart');
-    }
-
-    async loadDashboardData() {
-        try {
-            await Promise.all([
-                this.loadStats(),
-                this.loadRecentAlerts()
-            ]);
-        } catch (error) {
-            console.error('Failed to load dashboard data:', error);
-        }
+        this.updateInterval = null;
+        this.stats = {
+            totalSessions: 0,
+            anomalies: { critical: 0, high: 0, medium: 0, low: 0 },
+            lastAnalysis: null
+        };
     }
 
     async loadStats() {
         try {
-            const stats = await api.getDashboardStats();
-            this.updateStats(stats);
+            const stats = await app.apiCall('dashboard-stats');
+            this.updateStats(stats.data);
         } catch (error) {
-            console.error('Failed to load stats:', error);
+            console.error('Error loading dashboard stats:', error);
         }
     }
 
-    updateStats(stats) {
-        this.activeDevicesElement.textContent = stats.active_devices || 0;
-        this.alertCountElement.textContent = stats.alert_count || 0;
-        this.dataTransferElement.textContent = this.formatDataTransfer(stats.data_transfer || 0);
-        this.reportCountElement.textContent = stats.report_count || 0;
+    updateStats(data) {
+        if (data) {
+            this.stats = { ...this.stats, ...data };
+            
+            // Update DOM elements
+            document.getElementById('totalSessions').textContent = this.stats.totalSessions;
+            document.getElementById('lastAnalysisTime').textContent = 
+                this.stats.lastAnalysis ? app.formatTimestamp(this.stats.lastAnalysis) : 'Never';
+            
+            // Update anomaly counts
+            document.getElementById('criticalAnomalies').textContent = this.stats.anomalies.critical;
+            document.getElementById('highAnomalies').textContent = this.stats.anomalies.high;
+            document.getElementById('mediumAnomalies').textContent = this.stats.anomalies.medium;
+            document.getElementById('lowAnomalies').textContent = this.stats.anomalies.low;
+        }
     }
 
-    async loadRecentAlerts() {
+    async loadRecentActivity() {
         try {
-            const alerts = await api.getAlerts();
-            this.renderRecentAlerts(alerts);
+            const activity = await app.apiCall('recent-activity');
+            const activityFeed = document.getElementById('activityFeed');
+            
+            if (activity.data && activity.data.length > 0) {
+                activityFeed.innerHTML = activity.data.map(item => `
+                    <div class="activity-item">
+                        <span class="activity-time">${app.formatTimestamp(item.timestamp)}</span>
+                        <span class="activity-text">${item.description}</span>
+                    </div>
+                `).join('');
+            }
         } catch (error) {
-            console.error('Failed to load alerts:', error);
+            console.error('Error loading recent activity:', error);
         }
     }
 
-    renderRecentAlerts(alerts) {
-        this.recentAlertsElement.innerHTML = '';
-        
-        if (alerts.length === 0) {
-            this.recentAlertsElement.innerHTML = '<p class="text-gray-500">No recent alerts</p>';
-            return;
+    async loadRecentRecommendations() {
+        try {
+            const recommendations = await app.apiCall('recent-recommendations');
+            const recommendationsList = document.getElementById('recommendationsList');
+            
+            if (recommendations.data && recommendations.data.length > 0) {
+                recommendationsList.innerHTML = recommendations.data.map(rec => `
+                    <div class="recommendation-item">
+                        <span class="recommendation-type">${rec.type}</span>
+                        <span class="recommendation-text">${rec.text}</span>
+                        <span class="recommendation-time">${app.formatTimestamp(rec.created_at)}</span>
+                    </div>
+                `).join('');
+            }
+        } catch (error) {
+            console.error('Error loading recommendations:', error);
         }
-
-        alerts.slice(0, 5).forEach(alert => {
-            const alertElement = document.createElement('div');
-            alertElement.className = `alert-item ${alert.severity}`;
-            
-            alertElement.innerHTML = `
-                <div class="alert-icon">
-                    <i class="fas fa-${this.getAlertIcon(alert.severity)}"></i>
-                </div>
-                <div class="alert-content">
-                    <h4>${alert.alert_type}</h4>
-                    <p>${alert.message}</p>
-                </div>
-            `;
-            
-            this.recentAlertsElement.appendChild(alertElement);
-        });
-    }
-
-    getAlertIcon(severity) {
-        const icons = {
-            'low': 'info-circle',
-            'medium': 'exclamation-triangle',
-            'high': 'exclamation-circle',
-            'critical': 'times-circle'
-        };
-        return icons[severity] || 'info-circle';
-    }
-
-    formatDataTransfer(bytes) {
-        if (bytes === 0) return '0 MB';
-        const mb = bytes / (1024 * 1024);
-        return mb.toFixed(2) + ' MB';
     }
 
     startAutoRefresh() {
-        // Refresh dashboard data every 30 seconds
-        setInterval(() => {
-            this.loadDashboardData();
-        }, 30000);
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
+        
+        this.updateInterval = setInterval(() => {
+            this.refresh();
+        }, 30000); // Refresh every 30 seconds
     }
 
-    initializeNetworkChart() {
-        // Placeholder for network chart initialization
-        this.networkChartElement.innerHTML = `
-            <div style="text-align: center; color: #6b7280;">
-                <i class="fas fa-chart-line" style="font-size: 3rem; margin-bottom: 1rem;"></i>
-                <p>Network traffic chart will be displayed here</p>
-            </div>
+    stopAutoRefresh() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+            this.updateInterval = null;
+        }
+    }
+
+    async refresh() {
+        await Promise.all([
+            this.loadStats(),
+            this.loadRecentActivity(),
+            this.loadRecentRecommendations()
+        ]);
+    }
+
+    addActivityItem(description) {
+        const activityFeed = document.getElementById('activityFeed');
+        const activityItem = document.createElement('div');
+        activityItem.className = 'activity-item';
+        activityItem.innerHTML = `
+            <span class="activity-time">${new Date().toLocaleTimeString()}</span>
+            <span class="activity-text">${description}</span>
         `;
+        
+        activityFeed.insertBefore(activityItem, activityFeed.firstChild);
+        
+        // Keep only last 10 items
+        const items = activityFeed.querySelectorAll('.activity-item');
+        if (items.length > 10) {
+            activityFeed.removeChild(items[items.length - 1]);
+        }
+    }
+
+    addRecommendation(type, text) {
+        const recommendationsList = document.getElementById('recommendationsList');
+        const recommendationItem = document.createElement('div');
+        recommendationItem.className = 'recommendation-item';
+        recommendationItem.innerHTML = `
+            <span class="recommendation-type">${type}</span>
+            <span class="recommendation-text">${text}</span>
+            <span class="recommendation-time">Just now</span>
+        `;
+        
+        recommendationsList.insertBefore(recommendationItem, recommendationsList.firstChild);
+        
+        // Keep only last 5 recommendations
+        const items = recommendationsList.querySelectorAll('.recommendation-item');
+        if (items.length > 5) {
+            recommendationsList.removeChild(items[items.length - 1]);
+        }
+    }
+
+    updateAnomalyCount(severity, count) {
+        const element = document.getElementById(`${severity}Anomalies`);
+        if (element) {
+            element.textContent = count;
+            this.stats.anomalies[severity] = count;
+        }
     }
 }
 
-// Initialize when DOM is loaded
+// Initialize dashboard
+const dashboard = new Dashboard();
+
+// Start auto-refresh when dashboard is active
 document.addEventListener('DOMContentLoaded', () => {
-    window.dashboard = new Dashboard();
-    window.dashboard.initializeNetworkChart();
+    if (app.currentSection === 'dashboard') {
+        dashboard.startAutoRefresh();
+    }
 });
