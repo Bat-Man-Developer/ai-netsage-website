@@ -16,7 +16,7 @@
             <div class="header-content">
                 <div class="logo">
                     <h1>AI NetSage</h1>
-                    <span class="tagline">Enterprise Network Intelligence</span>
+                    <span class="tagline">Intelligent Network Analysis</span>
                 </div>
                 <nav class="main-nav">
                     <button class="nav-btn active" data-section="dashboard">Dashboard</button>
@@ -99,7 +99,7 @@
                     
                     <!-- IBM Granite 3.3 Instruct -->
                     <div class="model-card">
-                        <h3>IBM Granite 3.3 Instruct</h3>
+                        <h3>IBM Granite 3.3 Instruct 8B</h3>
                         <p class="model-description">Primary reasoning engine for real-time log analysis and anomaly detection</p>
                         <form class="model-form" id="granite33Form">
                             <div class="form-group">

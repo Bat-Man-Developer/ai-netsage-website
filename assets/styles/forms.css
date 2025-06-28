@@ -58,6 +58,7 @@
     font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
     font-size: 0.875rem;
     line-height: 1.4;
+    word-wrap: break-word;
 }
 
 .model-response:empty::before {
@@ -108,6 +109,7 @@
 .upload-area p {
     color: var(--text-secondary);
     margin-bottom: 1.5rem;
+    word-wrap: break-word;
 }
 
 .upload-area input[type="file"] {
@@ -162,6 +164,8 @@
     margin-bottom: 1rem;
     padding-bottom: 0.75rem;
     border-bottom: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .result-title {
@@ -172,11 +176,13 @@
 .result-timestamp {
     color: var(--text-secondary);
     font-size: 0.875rem;
+    white-space: nowrap;
 }
 
 .result-content {
     color: var(--text-primary);
     line-height: 1.6;
+    word-wrap: break-word;
 }
 
 /* Real-time Monitoring */
@@ -190,6 +196,7 @@
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
+    flex-wrap: wrap;
 }
 
 .monitor-status {
@@ -227,6 +234,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
 }
 
 .connections-list,
@@ -240,6 +249,7 @@
     padding: 1rem;
     border-radius: var(--border-radius);
     border: 1px solid var(--border-color);
+    word-wrap: break-word;
 }
 
 .connection-item,
@@ -247,6 +257,7 @@
     padding: 0.5rem 0;
     border-bottom: 1px solid var(--border-color);
     color: var(--text-secondary);
+    word-wrap: break-word;
 }
 
 .connection-item:last-child,
@@ -293,10 +304,12 @@
     border-radius: var(--border-radius-lg);
     box-shadow: var(--shadow-md);
     border: 1px solid var(--border-color);
+    flex-wrap: wrap;
 }
 
 .report-controls select {
     max-width: 200px;
+    min-width: 150px;
 }
 
 .reports-list {
@@ -313,6 +326,8 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 .report-info h4 {
@@ -328,6 +343,7 @@
 .report-actions {
     display: flex;
     gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .report-actions button {
@@ -358,6 +374,7 @@
     padding: 1rem;
     border-radius: var(--border-radius);
     margin: 1rem 0;
+    word-wrap: break-word;
 }
 
 .success-message {
@@ -367,10 +384,44 @@
     padding: 1rem;
     border-radius: var(--border-radius);
     margin: 1rem 0;
+    word-wrap: break-word;
 }
 
 /* Responsive Forms */
+@media (max-width: 1200px) {
+    .models-container,
+    .upload-container,
+    .realtime-container,
+    .reports-container,
+    .settings-container {
+        padding: 0 1rem;
+    }
+}
+
+@media (max-width: 992px) {
+    .monitoring-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.25rem;
+    }
+    
+    .model-card,
+    .upload-card,
+    .monitor-card,
+    .settings-form {
+        padding: 1.5rem;
+    }
+}
+
 @media (max-width: 768px) {
+    .models-container h2,
+    .upload-container h2,
+    .realtime-container h2,
+    .reports-container h2,
+    .settings-container h2 {
+        font-size: 1.5rem;
+        margin-bottom: 1.5rem;
+    }
+    
     .model-card,
     .upload-card,
     .monitor-card,
@@ -378,16 +429,30 @@
         padding: 1rem;
     }
     
+    .upload-area {
+        padding: 2rem 1rem;
+        margin: 0.5rem;
+    }
+    
+    .upload-icon {
+        font-size: 2.5rem;
+    }
+    
     .monitoring-controls,
     .report-controls {
         flex-direction: column;
         align-items: stretch;
+        gap: 0.75rem;
+    }
+    
+    .monitor-status {
+        margin-left: 0;
+        align-self: center;
     }
     
     .report-item {
         flex-direction: column;
         align-items: stretch;
-        gap: 1rem;
     }
     
     .report-actions {
@@ -396,5 +461,136 @@
     
     .monitoring-grid {
         grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .result-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .connections-list,
+    .traffic-log {
+        font-size: 0.8rem;
+        padding: 0.75rem;
+        max-height: 250px;
+    }
+}
+
+@media (max-width: 576px) {
+    .models-container h2,
+    .upload-container h2,
+    .realtime-container h2,
+    .reports-container h2,
+    .settings-container h2 {
+        font-size: 1.375rem;
+        margin-bottom: 1.25rem;
+    }
+    
+    .model-card,
+    .upload-card,
+    .monitor-card,
+    .settings-form,
+    .result-card {
+        padding: 0.875rem;
+    }
+    
+    .model-response {
+        font-size: 0.8rem;
+        padding: 0.75rem;
+        min-height: 80px;
+        max-height: 300px;
+    }
+    
+    .upload-area {
+        padding: 1.5rem 0.75rem;
+    }
+    
+    .upload-area h3 {
+        font-size: 1rem;
+    }
+    
+    .upload-area p {
+        font-size: 0.875rem;
+    }
+    
+    .monitoring-controls,
+    .report-controls {
+        padding: 1rem;
+    }
+    
+    .report-controls select {
+        max-width: none;
+        min-width: auto;
+    }
+    
+    .report-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .report-actions button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .models-container h2,
+    .upload-container h2,
+    .realtime-container h2,
+    .reports-container h2,
+    .settings-container h2 {
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+    
+    .model-card h3 {
+        font-size: 1.125rem;
+    }
+    
+    .model-description {
+        font-size: 0.875rem;
+    }
+    
+    .upload-icon {
+        font-size: 2rem;
+    }
+    
+    .connections-list,
+    .traffic-log {
+        font-size: 0.75rem;
+        max-height: 200px;
+    }
+    
+    .traffic-stats .stat {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .model-card,
+    .upload-card,
+    .monitor-card,
+    .settings-form,
+    .result-card {
+        padding: 0.75rem;
+    }
+    
+    .monitoring-controls,
+    .report-controls {
+        padding: 0.75rem;
+    }
+    
+    .upload-area {
+        padding: 1rem 0.5rem;
+    }
+    
+    .model-response {
+        font-size: 0.75rem;
+        padding: 0.5rem;
     }
 }
