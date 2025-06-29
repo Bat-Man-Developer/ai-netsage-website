@@ -1,154 +1,157 @@
-// Dashboard Management
-class Dashboard {
-    constructor() {
-        this.updateInterval = null;
-        this.stats = {
-            totalSessions: 0,
-            anomalies: { critical: 0, high: 0, medium: 0, low: 0 },
-            lastAnalysis: null
-        };
-    }
+/**
+ * Dashboard functionality
+ */
 
-    async loadStats() {
-        try {
-            const stats = await app.apiCall('dashboard-stats');
-            this.updateStats(stats.data);
-        } catch (error) {
-            console.error('Error loading dashboard stats:', error);
-        }
+function initializeDashboard() {
+    const generateReportBtn = document.getElementById('generate-report');
+    const clearDataBtn = document.getElementById('clear-data');
+    
+    if (generateReportBtn) {
+        generateReportBtn.addEventListener('click', generateReport);
     }
-
-    updateStats(data) {
-        if (data) {
-            this.stats = { ...this.stats, ...data };
-            
-            // Update DOM elements
-            document.getElementById('totalSessions').textContent = this.stats.totalSessions;
-            document.getElementById('lastAnalysisTime').textContent = 
-                this.stats.lastAnalysis ? app.formatTimestamp(this.stats.lastAnalysis) : 'Never';
-            
-            // Update anomaly counts
-            document.getElementById('criticalAnomalies').textContent = this.stats.anomalies.critical;
-            document.getElementById('highAnomalies').textContent = this.stats.anomalies.high;
-            document.getElementById('mediumAnomalies').textContent = this.stats.anomalies.medium;
-            document.getElementById('lowAnomalies').textContent = this.stats.anomalies.low;
-        }
+    
+    if (clearDataBtn) {
+        clearDataBtn.addEventListener('click', clearAllData);
     }
+    
+    // Auto-refresh dashboard stats every 30 seconds
+    setInterval(window.AppUtils.updateDashboardStats, 30000);
+}
 
-    async loadRecentActivity() {
-        try {
-            const activity = await app.apiCall('recent-activity');
-            const activityFeed = document.getElementById('activityFeed');
-            
-            if (activity.data && activity.data.length > 0) {
-                activityFeed.innerHTML = activity.data.map(item => `
-                    <div class="activity-item">
-                        <span class="activity-time">${app.formatTimestamp(item.timestamp)}</span>
-                        <span class="activity-text">${item.description}</span>
-                    </div>
-                `).join('');
-            }
-        } catch (error) {
-            console.error('Error loading recent activity:', error);
-        }
-    }
-
-    async loadRecentRecommendations() {
-        try {
-            const recommendations = await app.apiCall('recent-recommendations');
-            const recommendationsList = document.getElementById('recommendationsList');
-            
-            if (recommendations.data && recommendations.data.length > 0) {
-                recommendationsList.innerHTML = recommendations.data.map(rec => `
-                    <div class="recommendation-item">
-                        <span class="recommendation-type">${rec.type}</span>
-                        <span class="recommendation-text">${rec.text}</span>
-                        <span class="recommendation-time">${app.formatTimestamp(rec.created_at)}</span>
-                    </div>
-                `).join('');
-            }
-        } catch (error) {
-            console.error('Error loading recommendations:', error);
-        }
-    }
-
-    startAutoRefresh() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-        }
+async function generateReport() {
+    const btn = document.getElementById('generate-report');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+    
+    try {
+        const reportData = await collectReportData();
+        const reportHtml = generateReportHTML(reportData);
         
-        this.updateInterval = setInterval(() => {
-            this.refresh();
-        }, 30000); // Refresh every 30 seconds
-    }
-
-    stopAutoRefresh() {
-        if (this.updateInterval) {
-            clearInterval(this.updateInterval);
-            this.updateInterval = null;
-        }
-    }
-
-    async refresh() {
-        await Promise.all([
-            this.loadStats(),
-            this.loadRecentActivity(),
-            this.loadRecentRecommendations()
-        ]);
-    }
-
-    addActivityItem(description) {
-        const activityFeed = document.getElementById('activityFeed');
-        const activityItem = document.createElement('div');
-        activityItem.className = 'activity-item';
-        activityItem.innerHTML = `
-            <span class="activity-time">${new Date().toLocaleTimeString()}</span>
-            <span class="activity-text">${description}</span>
-        `;
+        // Create and download report
+        const blob = new Blob([reportHtml], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `netsage-report-${Date.now()}.html`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
         
-        activityFeed.insertBefore(activityItem, activityFeed.firstChild);
+        // Update stats
+        const reportsCount = parseInt(localStorage.getItem('reports-count') || '0') + 1;
+        localStorage.setItem('reports-count', reportsCount.toString());
+        window.AppUtils.updateDashboardStats();
         
-        // Keep only last 10 items
-        const items = activityFeed.querySelectorAll('.activity-item');
-        if (items.length > 10) {
-            activityFeed.removeChild(items[items.length - 1]);
-        }
-    }
-
-    addRecommendation(type, text) {
-        const recommendationsList = document.getElementById('recommendationsList');
-        const recommendationItem = document.createElement('div');
-        recommendationItem.className = 'recommendation-item';
-        recommendationItem.innerHTML = `
-            <span class="recommendation-type">${type}</span>
-            <span class="recommendation-text">${text}</span>
-            <span class="recommendation-time">Just now</span>
-        `;
+        window.AppUtils.showNotification('Report generated successfully!', 'success');
         
-        recommendationsList.insertBefore(recommendationItem, recommendationsList.firstChild);
-        
-        // Keep only last 5 recommendations
-        const items = recommendationsList.querySelectorAll('.recommendation-item');
-        if (items.length > 5) {
-            recommendationsList.removeChild(items[items.length - 1]);
-        }
-    }
-
-    updateAnomalyCount(severity, count) {
-        const element = document.getElementById(`${severity}Anomalies`);
-        if (element) {
-            element.textContent = count;
-            this.stats.anomalies[severity] = count;
-        }
+    } catch (error) {
+        console.error('Error generating report:', error);
+        window.AppUtils.showNotification('Error generating report: ' + error.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-file-download"></i> Generate Report';
     }
 }
 
-// Initialize dashboard
-const dashboard = new Dashboard();
+async function collectReportData() {
+    return {
+        timestamp: new Date().toISOString(),
+        reportId: window.AppUtils.generateReportId(),
+        stats: {
+            anomalies: localStorage.getItem('anomaly-count') || '0',
+            lastAnalysis: localStorage.getItem('last-analysis') || 'Never',
+            activeConnections: localStorage.getItem('active-connections') || '0',
+            reports: localStorage.getItem('reports-count') || '0'
+        },
+        networkData: getStoredNetworkData(),
+        analysisResults: getStoredAnalysisResults()
+    };
+}
 
-// Start auto-refresh when dashboard is active
-document.addEventListener('DOMContentLoaded', () => {
-    if (app.currentSection === 'dashboard') {
-        dashboard.startAutoRefresh();
+function generateReportHTML(data) {
+    return `
+<!DOCTYPE html>
+<html>
+<head>
+    <title>AI NetSage Report - ${data.reportId}</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .header { background: #667eea; color: white; padding: 20px; border-radius: 8px; }
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin: 20px 0; }
+        .stat-box { background: #f8f9fa; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 8px; }
+        pre { background: #f8f9fa; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>AI NetSage Network Analysis Report</h1>
+        <p>Report ID: ${data.reportId}</p>
+        <p>Generated: ${new Date(data.timestamp).toLocaleString()}</p>
+    </div>
+    
+    <div class="stats">
+        <div class="stat-box">
+            <h3>Anomalies Detected</h3>
+            <p>${data.stats.anomalies}</p>
+        </div>
+        <div class="stat-box">
+            <h3>Last Analysis</h3>
+            <p>${data.stats.lastAnalysis}</p>
+        </div>
+        <div class="stat-box">
+            <h3>Active Connections</h3>
+            <p>${data.stats.activeConnections}</p>
+        </div>
+        <div class="stat-box">
+            <h3>Total Reports</h3>
+            <p>${data.stats.reports}</p>
+        </div>
+    </div>
+    
+    <div class="section">
+        <h2>Network Data Summary</h2>
+        <pre>${JSON.stringify(data.networkData, null, 2)}</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Analysis Results</h2>
+        <pre>${JSON.stringify(data.analysisResults, null, 2)}</pre>
+    </div>
+    
+    <div class="section">
+        <h2>Recommendations</h2>
+        <ul>
+            <li>Continue monitoring network traffic patterns</li>
+            <li>Review anomalies detected during this period</li>
+            <li>Update security configurations as needed</li>
+            <li>Schedule regular analysis intervals</li>
+        </ul>
+    </div>
+</body>
+</html>`;
+}
+
+function getStoredNetworkData() {
+    return JSON.parse(localStorage.getItem('network-data') || '[]');
+}
+
+function getStoredAnalysisResults() {
+    return JSON.parse(localStorage.getItem('analysis-results') || '[]');
+}
+
+function clearAllData() {
+    if (confirm('Are you sure you want to clear all data? This action cannot be undone.')) {
+        localStorage.removeItem('network-data');
+        localStorage.removeItem('analysis-results');
+        localStorage.setItem('anomaly-count', '0');
+        localStorage.setItem('last-analysis', 'Never');
+        localStorage.setItem('active-connections', '0');
+        
+        document.getElementById('analysis-output').innerHTML = '<p class="no-data">No analysis performed yet. Upload logs or start real-time monitoring.</p>';
+        
+        window.AppUtils.updateDashboardStats();
+        window.AppUtils.showNotification('All data cleared successfully!', 'success');
     }
-});
+}
